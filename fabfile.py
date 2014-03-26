@@ -68,3 +68,7 @@ def prompt_test():
     dir = '/{0}'.format(local)
     with cd(dir):
         run('ls')
+
+def install(package):
+    '''Install a package / apt-get'''
+    sudo("apt-get -y install %s" % package)
