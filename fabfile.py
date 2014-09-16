@@ -72,3 +72,22 @@ def prompt_test():
 def install(package):
     '''Install a package / apt-get'''
     sudo("apt-get -y install %s" % package)
+
+@task
+def asm_disks():
+    '''Task to get disk information and ASM disks'''
+    disks = []
+    sudo('vgdisplay -v')
+    sudo('pvdisplay -v')
+    sudo('dmesg|grep sd')
+    sudo('df -h')
+    sudo('cat /etc/fstab')
+    disks.append(sudo('/etc/init.d/oracleasm listdisks').splitlines())
+    for disk in disks:
+         numbers = range(0, len(disk))
+         for number in numbers:
+            devices = []
+            devices.append(sudo('/etc/init.d/oracleasm querydisk -d {0}'.format(disk[number])))
+            for device in devices:
+                partition = device.split('[', 1)[1].split(']')[0]
+                sudo('ls -l /dev |grep {0}|grep {1}'.format(partition.split(',')[0], partition.split(',')[1]))
