@@ -91,3 +91,23 @@ def asm_disks():
             for device in devices:
                 partition = device.split('[', 1)[1].split(']')[0]
                 sudo('ls -l /dev |grep {0}|grep {1}'.format(partition.split(',')[0], partition.split(',')[1]))
+
+@task
+def remove_pkg_weblogic(domain,pkg,duser,dpassword,dhostname,cluster,classpath,dport):
+    name = sudo('''cat {0}/config/config.xml |  grep {1}|grep -v argument|sed 's/\(.*<name>\)//' | sed 's/\(<\/name>*\)//'| head -1'''.format(domain,pkg))
+    sudo('''/u01/jdk/bin/java -classpath {5} weblogic.Deployer -adminurl t3://{0}:{6} -user {1} -password {2} -undeploy -name {3} -targets {4}'''.format(dhostname,duser,dpassword,name,cluster,classpath,dport))
+
+@task
+def deploy_weblogic(domain,pkg,classpath,duser,dpassword,upload,cluster,dhostname,dport,vm_admin):
+    name = sudo('''ls {0}/servers/{2}/upload/{1}*'''.format(domain,pkg,vm_admin))
+    name = os.path.basename(name)
+    sudo('''/u01/jdk/bin/java -classpath {0} weblogic.Deployer -adminurl t3://{1}:{7} -user {2} -password {3} -stage -distribute -name {4} "{5}{4}" -targets {6}'''.format(classpath,dhostname,duser,dpassword,name,upload,cluster,dport))
+    sudo('''/u01/jdk/bin/java -classpath {0} weblogic.Deployer -adminurl t3://{1}:{6} -user {2} -password {3} -start -name {4} -targets {5}'''.format(classpath,dhostname,duser,dpassword,name,cluster,dport))
+
+@task
+def stop_weblogic(domain,pkg,duser,dpassword,dhostname,cluster,classpath,dport):
+    sudo('''/u01/jdk/bin/java -classpath {4} weblogic.Admin -url t3://{0}:{5} -username {1} -password {2} STOPCLUSTER -clusterName {3}'''.format(dhostname,duser,dpassword,cluster,classpath,dport))
+
+@task
+def start_weblogic(duser,dpassword,dhostname,dport,cluster):
+    lrun('''/home/oracle/start.sh -u {0} -p {1} -h {2}:{3} -c {4}'''.format(duser,dpassword,dhostname,dport,cluster))
