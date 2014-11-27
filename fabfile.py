@@ -37,6 +37,7 @@ def get_file():
 
 @task
 def read_key_file(key_file):
+    '''Check if a key is public'''
     key_file = os.path.expanduser(key_file)
     if not key_file.endswith('pub'):
         raise RuntimeWarning('Trying to push non-public part of key pair')
@@ -107,11 +108,13 @@ def asm_disks():
 
 @task
 def remove_pkg_weblogic(domain,pkg,duser,dpassword,dhostname,cluster,classpath,dport):
+    '''Remove a weblogic package(ear)'''
     name = sudo('''cat {0}/config/config.xml |  grep {1}|grep -v argument|sed 's/\(.*<name>\)//' | sed 's/\(<\/name>*\)//'| head -1'''.format(domain,pkg))
     sudo('''/u01/jdk/bin/java -classpath {5} weblogic.Deployer -adminurl t3://{0}:{6} -user {1} -password {2} -undeploy -name {3} -targets {4}'''.format(dhostname,duser,dpassword,name,cluster,classpath,dport))
 
 @task
 def deploy_weblogic(domain,pkg,classpath,duser,dpassword,upload,cluster,dhostname,dport,vm_admin):
+    '''Deploy a package(ear) to weblogic'''
     name = sudo('''ls {0}/servers/{2}/upload/{1}*'''.format(domain,pkg,vm_admin))
     name = os.path.basename(name)
     sudo('''/u01/jdk/bin/java -classpath {0} weblogic.Deployer -adminurl t3://{1}:{7} -user {2} -password {3} -stage -distribute -name {4} "{5}{4}" -targets {6}'''.format(classpath,dhostname,duser,dpassword,name,upload,cluster,dport))
@@ -119,8 +122,10 @@ def deploy_weblogic(domain,pkg,classpath,duser,dpassword,upload,cluster,dhostnam
 
 @task
 def stop_weblogic(domain,pkg,duser,dpassword,dhostname,cluster,classpath,dport):
+    '''Stop weblogic VM'''
     sudo('''/u01/jdk/bin/java -classpath {4} weblogic.Admin -url t3://{0}:{5} -username {1} -password {2} STOPCLUSTER -clusterName {3}'''.format(dhostname,duser,dpassword,cluster,classpath,dport))
 
 @task
 def start_weblogic(duser,dpassword,dhostname,dport,cluster):
+    '''Start weblogic VM'''
     lrun('''/home/oracle/start.sh -u {0} -p {1} -h {2}:{3} -c {4}'''.format(duser,dpassword,dhostname,dport,cluster))
