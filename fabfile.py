@@ -9,6 +9,7 @@ import os,sys
 
 env.roledefs = {
     'webservers': ['web01','web02','web03','web04'],                                         # My web servers
+    'dbs': ['db01','db02','db03','db04'],                                         # My database servers
 }
 
 def mem_usage():
@@ -69,6 +70,7 @@ def prompt_test():
     with cd(dir):
         run('ls')
 
+@task
 def install(package):
     '''Install a package / apt-get'''
     sudo("apt-get -y install %s" % package)
