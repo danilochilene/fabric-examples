@@ -3,7 +3,7 @@
     fabfile.py Example
     author: Danilo F. Chilene <bicofino at gmail dot com>
 """
-from fabric.api import run,sudo,put,prompt,cd,env,get
+from fabric.api import run,sudo,put,prompt,cd,env,get,task
 from fabric.contrib.files import append,exists
 import os,sys
 
