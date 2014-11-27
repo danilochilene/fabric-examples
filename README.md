@@ -1,8 +1,5 @@
-fabric
+Fabric Examples
 ======
-
-Fabric examples
-
 
 ~/g/fabric-examples git:master ❯❯❯ fab --list
 
